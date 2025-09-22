@@ -2,6 +2,7 @@ from typing import TypedDict
 from httpx import Response
 
 from clients.api_client import APIClient
+from clients.public_httpx_builder import get_public_http_client
 
 
 class CreateUserRequestDict(TypedDict):
@@ -35,3 +36,11 @@ class PublicUsersClient(APIClient):
         :return: Объект httpx.Response с данными ответа сервера.
         """
         return self.post("/api/v1/users", json=request)
+
+
+def get_public_users_client() -> PublicUsersClient:
+    """
+    Функция создает экземпляр класса PublicUsersClient с использованием публичного http-клиента.
+    :return: Готовый к использованию экземпляр httpx.Client.
+    """
+    return PublicUsersClient(client=get_public_http_client())
