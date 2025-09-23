@@ -3,9 +3,31 @@ from clients.api_client import APIClient
 from typing import TypedDict
 
 from clients.users.private_http_builder import get_private_http_client, AuthenticationUserDict
+from clients.users.public_users_client import User
+
+
+class User(TypedDict):
+    """
+    Описание структуры пользователя
+    """
+    id: str
+    email: str
+    lastName: str
+    firstName: str
+    MiddleName: str
+
+
+class GetUserResponseDict(TypedDict):
+    """
+    Описание структуры ответа получения информации о пользователе
+    """
+    user: User
 
 
 class UpdateUserRequestDict(TypedDict):
+    """
+    Описания структуры запроса обновления информации о пользователе
+    """
     email: str | None = None
     lastName: str | None = None
     firstName: str | None = None
@@ -14,7 +36,7 @@ class UpdateUserRequestDict(TypedDict):
 
 
 class PrivateUsersClient(APIClient):
-    def get_get_user_me_api(self) -> Response:
+    def get_user_me_api(self) -> Response:
         """
         Метод получения информации по идентифекатору
         :param user_id: идентификатор пользователя
@@ -22,7 +44,7 @@ class PrivateUsersClient(APIClient):
         """
         return self.get("/api/v1/users/me")
 
-    def get_get_user_api(self, user_id: str) -> Response:
+    def get_user_api(self, user_id: str) -> Response:
         """
         Метод получения информации по идентифекатору
         :param user_id: идентификатор пользователя
@@ -49,6 +71,15 @@ class PrivateUsersClient(APIClient):
         :return: ответ сервера в виде объекта Response
         """
         return self.delete(f"/api/v1/users/{user_id}")
+
+    def get_user(self, user_id: str) -> GetUserResponseDict:
+        """
+        Метод получения информации по идентифекатору
+        :param user_id:
+        :return:
+        """
+        response = self.get_user_api(user_id)
+        return response.json()
 
 
 def get_private_users_client(user: AuthenticationUserDict) -> PrivateUsersClient:
