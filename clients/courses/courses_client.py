@@ -1,34 +1,45 @@
 from clients.api_client import APIClient
 from httpx import Response
-from typing import TypedDict
+from pydantic import BaseModel
+from clients.files.files_client import FileSchema
+from clients.users.private_http_builder import get_private_http_client, AuthenticationUserSchema
+from clients.users.private_users_client import UserSchema
 
-from clients.files.files_client import File
-from clients.users.private_http_builder import get_private_http_client, AuthenticationUserDict
-from clients.users.private_users_client import User
 
-
-class Course(TypedDict):
+class CourseSchema(BaseModel):
+    """
+    Представляет схему для курса в образовательной системе.
+    """
     id: str
     title: str
     maxScore: int
     minScore: int
     description: str
-    previewFile: File
+    previewFile: FileSchema
     estimatedTime: str
-    createdByUser: User
+    createdByUser: UserSchema
 
 
-class CreateCourseResponseDict(TypedDict):
-    course: Course
+class CreateCourseResponseSchema(BaseModel):
+    """
+    Представляет схему ответа при создании курса.
 
-class GetCoursesQueryDict(TypedDict):
+    Этот класс предназначен для инкапсуляции данных ответа при создании
+    курса. Он включает детали созданного курса, определённые в `CourseSchema`.
+
+    :ivar course: Детали созданного курса.
+    :type course: CourseSchema
+    """
+    course: CourseSchema
+
+class GetCoursesQuerySchema(BaseModel):
     """
     Описание структуры запроса
     """
     userId: str
 
 
-class CreateCourseRequestDict(TypedDict):
+class CreateCourseRequestSchema(BaseModel):
     """
     Описание структуры запроса для создания курса
     """
@@ -41,7 +52,7 @@ class CreateCourseRequestDict(TypedDict):
     createdByUserId: str
 
 
-class UpdateCoursesQueryDict(TypedDict):
+class UpdateCoursesQuerySchema(BaseModel):
     """
     Описание структуры запроса для обновления курса
     """
@@ -57,7 +68,7 @@ class CoursesClient(APIClient):
     """
     Класс для работы с курсами /api/v1/courses
     """
-    def get_courses_api(self, query: GetCoursesQueryDict) -> Response:
+    def get_courses_api(self, query: GetCoursesQuerySchema) -> Response:
         """
         Метод для получения курсов
         :param query: словарь с userId
@@ -73,7 +84,7 @@ class CoursesClient(APIClient):
         """
         return self.get(f"/api/v1/courses/{course_id}")
 
-    def create_course_api(self, request: CreateCourseRequestDict) -> Response:
+    def create_course_api(self, request: CreateCourseRequestSchema) -> Response:
         """
         Метод для создания курса
         :param request: словарь с данными курса
@@ -81,7 +92,7 @@ class CoursesClient(APIClient):
         """
         return self.post("/api/v1/courses", json=request)
 
-    def update_course_api(self, course_id: str, request: UpdateCoursesQueryDict) -> Response:
+    def update_course_api(self, course_id: str, request: UpdateCoursesQuerySchema) -> Response:
         """
         Метод для обновления курса
         :param course_id: id курса
@@ -98,11 +109,25 @@ class CoursesClient(APIClient):
         """
         return self.delete(f"/api/v1/courses/{course_id}")
 
-    def create_course(self, request: CreateCourseRequestDict) -> CreateCourseResponseDict:
-        response = self.create_course_api(request)
-        return response.json()
+    def create_course(self, request: CreateCourseRequestSchema) -> CreateCourseResponseSchema:
+        """
+    Создаёт новый курс, вызывая API создания курса.
 
-def get_courses_client(user: AuthenticationUserDict) -> CoursesClient:
+    Этот метод обрабатывает запрос на создание курса, используя предоставленные
+    данные, инкапсулированные в `CreateCourseRequestSchema`. Он вызывает внешний
+    эндпоинт API для выполнения создания и обрабатывает ответ API.
+    Полученные данные затем валидируются и возвращаются в виде экземпляра
+    `CreateCourseResponseSchema`.
+
+    :param request: Входные данные для создания курса, представленные как экземпляр `CreateCourseRequestSchema`
+    :type request: CreateCourseRequestSchema
+    :return: Ответ от API создания курса, валидированный как экземпляр `CreateCourseResponseSchema`
+    :rtype: CreateCourseResponseSchema
+        """
+        response = self.create_course_api(request)
+        return CreateCourseResponseSchema.model_validate_json(response.text)
+
+def get_courses_client(user: AuthenticationUserSchema) -> CoursesClient:
     """
     Функция создаёт экземпляр CoursesClient с уже настроенным HTTP-клиентом.
     :return: Готовый к использованию PrivateUserscient.

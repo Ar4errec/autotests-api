@@ -1,11 +1,11 @@
-from typing import TypedDict
 from httpx import Response
+from pydantic import BaseModel, Field
 
 from clients.api_client import APIClient
 from clients.public_httpx_builder import get_public_http_client
 
 
-class User(TypedDict):
+class UserSchema(BaseModel):
     """
     Описывает структуру данных пользователя.
     """
@@ -13,9 +13,9 @@ class User(TypedDict):
     email: str
     lastName: str
     firstName: str
-    MiddleName: str
+    middle_name: str = Field(alias="middleName")
 
-class CreateUserRequestDict(TypedDict):
+class CreateUserRequestSchema(BaseModel):
     """
     Описание структуры запроса для создания пользователя.
     """
@@ -26,11 +26,11 @@ class CreateUserRequestDict(TypedDict):
     middleName: str
 
 
-class CreateUserResponseDict(TypedDict):
+class CreateUserResponseSchema(BaseModel):
     """
     Описывает структуру ответа сервера при создании пользователя.
     """
-    user: User
+    user: UserSchema
 
 
 class PublicUsersClient(APIClient):
@@ -39,7 +39,7 @@ class PublicUsersClient(APIClient):
     Включает эндпоинты, которые не требуют авторизации (например, создание пользователя).
     """
 
-    def create_user_api(self, request: CreateUserRequestDict) -> Response:
+    def create_user_api(self, request: CreateUserRequestSchema) -> Response:
         """
         Создаёт нового пользователя в системе.
 
@@ -52,9 +52,9 @@ class PublicUsersClient(APIClient):
                 - middleName: str — отчество
         :return: Объект httpx.Response с данными ответа сервера.
         """
-        return self.post("/api/v1/users", json=request)
+        return self.post("/api/v1/users", json=request.model_dump(by_alias=True))
 
-    def create_user(self, request: CreateUserRequestDict) -> CreateUserResponseDict:
+    def create_user(self, request: CreateUserRequestSchema) -> CreateUserResponseSchema:
         """
         Создаёт нового пользователя в системе.
 
@@ -65,7 +65,7 @@ class PublicUsersClient(APIClient):
         :return:
         """
         response = self.create_user_api(request)
-        return response.json()
+        return CreateUserResponseSchema.model_validate_json(response.text)
 
 
 def get_public_users_client() -> PublicUsersClient:

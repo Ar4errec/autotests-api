@@ -1,12 +1,10 @@
 from httpx import Response
 from clients.api_client import APIClient
-from typing import TypedDict
-
-from clients.users.private_http_builder import get_private_http_client, AuthenticationUserDict
-from clients.users.public_users_client import User
+from pydantic import BaseModel
+from clients.users.private_http_builder import get_private_http_client, AuthenticationUserSchema
 
 
-class User(TypedDict):
+class UserSchema(BaseModel):
     """
     Описание структуры пользователя
     """
@@ -17,14 +15,14 @@ class User(TypedDict):
     MiddleName: str
 
 
-class GetUserResponseDict(TypedDict):
+class GetUserResponseSchema(BaseModel):
     """
     Описание структуры ответа получения информации о пользователе
     """
-    user: User
+    user: UserSchema
 
 
-class UpdateUserRequestDict(TypedDict):
+class UpdateUserRequestSchema(BaseModel):
     """
     Описания структуры запроса обновления информации о пользователе
     """
@@ -72,7 +70,7 @@ class PrivateUsersClient(APIClient):
         """
         return self.delete(f"/api/v1/users/{user_id}")
 
-    def get_user(self, user_id: str) -> GetUserResponseDict:
+    def get_user(self, user_id: str) -> GetUserResponseSchema:
         """
         Метод получения информации по идентифекатору
         :param user_id:
@@ -82,9 +80,9 @@ class PrivateUsersClient(APIClient):
         return response.json()
 
 
-def get_private_users_client(user: AuthenticationUserDict) -> PrivateUsersClient:
+def get_private_users_client(user: AuthenticationUserSchema) -> PrivateUsersClient:
     """
     Функция создаёт экземпляр PrivateUsersClient с уже настроенным HTTP-клиентом.
-    :return: Готовый к использованию PrivateUserscient.
+    :return: Готовый к использованию PrivateUsersClient.
     """
-    return PrivateUsersClient(client=get_private_http_client())
+    return PrivateUsersClient(client=get_private_http_client(user))

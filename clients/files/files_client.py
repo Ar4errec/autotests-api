@@ -1,18 +1,21 @@
 from clients.api_client import APIClient
 from httpx import Response
-from typing import TypedDict
+from pydantic import BaseModel
+from clients.users.private_http_builder import get_private_http_client, AuthenticationUserSchema
 
-from clients.users.private_http_builder import get_private_http_client, AuthenticationUserDict
 
+class FileSchema(BaseModel):
+    """
+    Представляет схему и структуру файла.
 
-class File(TypedDict):
+    """
     id: str
     filename: str
     directory: str
     url: str
 
 
-class CreateFileRequestDict(TypedDict):
+class CreateFileRequestSchema(BaseModel):
     """
     Описание запроса на создание файла
     """
@@ -20,8 +23,17 @@ class CreateFileRequestDict(TypedDict):
     directory: str
     upload_file: str
 
-class CreateFileResponseDict(TypedDict):
-    file: File
+class CreateFileResponseSchema(BaseModel):
+    """
+    Представляет схему ответа при создании файла.
+
+    Этот класс используется для моделирования ответа, возвращаемого при успешном
+    создании файла. Он инкапсулирует детали файла в форме объекта `FileSchema`.
+
+    :ivar file: Детали созданного файла.
+    :type file: FileSchema
+    """
+    file: FileSchema
 
 
 
@@ -40,7 +52,7 @@ class FilesClient(APIClient):
 
 
 
-    def create_file_api(self, request: CreateFileRequestDict) -> Response:
+    def create_file_api(self, request: CreateFileRequestSchema) -> Response:
         """
         Метод создания файла
         :param request: Запрос на создание файла
@@ -61,13 +73,13 @@ class FilesClient(APIClient):
          """
          return self.delete(f"/api/v1/files/{file_id}")
 
-    def create_file(self,request: CreateFileRequestDict) -> CreateFileResponseDict:
+    def create_file(self,request: CreateFileRequestSchema) -> CreateFileResponseSchema:
         response = self. create_file_api(request)
-        return response.json()
+        return CreateFileResponseSchema.model_validate_json(response.text)
 
 
 
-def get_files_client(user: AuthenticationUserDict) -> FilesClient:
+def get_files_client(user: AuthenticationUserSchema) -> FilesClient:
     """
     Функция создаёт экземпляр FilesClient с уже настроенным HTTP-клиентом.
     :return: Готовый к использованию PrivateUserscient.
