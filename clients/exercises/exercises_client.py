@@ -1,74 +1,15 @@
-from pydantic import BaseModel
 from httpx import Response
 from clients.api_client import APIClient
 from clients.users.private_http_builder import AuthenticationUserSchema, get_private_http_client
-
-
-class ExerciseSchema(BaseModel):
-    """
-    Описание структуры упражнения
-    """
-    id: str
-    title: str
-    courseId: str
-    maxScore: int
-    minScore: int
-    orderIndex: int
-    description: str
-    estimatedTime: str
-
-
-class GetExercisesQuerySchema(BaseModel):
-    """
-    Описание структуры запроса на получение списка упражнений
-    """
-    courseId: str
-
-
-class GetExercisesResponseSchema(BaseModel):
-    """
-    Описание структуры ответа на получение списка упражнений
-    """
-    exercises: list[ExerciseSchema]
-
-
-class CreateExerciseRequestSchema(BaseModel):
-    """
-    Описание структуры запроса на создание упражнения
-    """
-    title: str
-    courseId: str
-    maxScore: int
-    minScore: int
-    orderIndex: int
-    description: str
-    estimatedTime: str
-
-
-class CreateExerciseResponseSchema(BaseModel):
-    """
-    Описание структуры ответа при создании упражнения
-    """
-    exercise: ExerciseSchema
-
-
-class UpdateExerciseRequestSchema(BaseModel):
-    """
-    Описание структуры запроса на обновление упражнения
-    """
-    title: str | None
-    maxScore: int | None
-    minScore: int | None
-    orderIndex: int | None
-    description: str | None
-    estimatedTime: str | None
-
-
-class UpdateExerciseResponseSchema(BaseModel):
-    """
-    Описание структуры ответа при обновлении упражнения
-    """
-    exercise: ExerciseSchema
+from clients.exercises.exercises_schema import (
+    CreateExerciseRequestSchema,
+    CreateExerciseResponseSchema,
+    UpdateExerciseRequestSchema,
+    UpdateExerciseResponseSchema,
+    GetExercisesQuerySchema,
+    GetExercisesResponseSchema,
+    ExerciseSchema
+)
 
 
 class ExercisesClient(APIClient):
@@ -78,7 +19,7 @@ class ExercisesClient(APIClient):
 
     def get_exercises_api(self, query: GetExercisesQuerySchema) -> Response:
         """
-        Отправляет запрос GET /api/v1/exercises
+        Отправляет запрос GET /api/v1/exercises с query-параметрами
         """
         return self.get("/api/v1/exercises", params=query.model_dump(by_alias=True))
 
@@ -106,7 +47,7 @@ class ExercisesClient(APIClient):
         """
         return self.delete(f"/api/v1/exercises/{exercise_id}")
 
-    # Методы с возвратом JSON
+    # Методы с возвратом Pydantic-моделей
 
     def get_exercises(self, query: GetExercisesQuerySchema) -> GetExercisesResponseSchema:
         """
@@ -120,11 +61,12 @@ class ExercisesClient(APIClient):
         Получает одно упражнение по id
         """
         response = self.get_exercise_api(exercise_id)
-        return response.json()
+        # Валидируем через Pydantic
+        return ExerciseSchema.model_validate(response.json())
 
     def create_exercise(self, request: CreateExerciseRequestSchema) -> CreateExerciseResponseSchema:
         """
-        Создаёт упражнение
+        Создаёт новое упражнение
         """
         response = self.create_exercise_api(request)
         return CreateExerciseResponseSchema.model_validate_json(response.text)

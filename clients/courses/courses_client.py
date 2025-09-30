@@ -1,67 +1,7 @@
 from clients.api_client import APIClient
 from httpx import Response
-from pydantic import BaseModel
-from clients.files.files_client import FileSchema
 from clients.users.private_http_builder import get_private_http_client, AuthenticationUserSchema
-from clients.users.private_users_client import UserSchema
-
-
-class CourseSchema(BaseModel):
-    """
-    Представляет схему для курса в образовательной системе.
-    """
-    id: str
-    title: str
-    maxScore: int
-    minScore: int
-    description: str
-    previewFile: FileSchema
-    estimatedTime: str
-    createdByUser: UserSchema
-
-
-class CreateCourseResponseSchema(BaseModel):
-    """
-    Представляет схему ответа при создании курса.
-
-    Этот класс предназначен для инкапсуляции данных ответа при создании
-    курса. Он включает детали созданного курса, определённые в `CourseSchema`.
-
-    :ivar course: Детали созданного курса.
-    :type course: CourseSchema
-    """
-    course: CourseSchema
-
-class GetCoursesQuerySchema(BaseModel):
-    """
-    Описание структуры запроса
-    """
-    userId: str
-
-
-class CreateCourseRequestSchema(BaseModel):
-    """
-    Описание структуры запроса для создания курса
-    """
-    title: str
-    maxScore: int
-    minScore: int
-    description: str
-    estimatedTime: str
-    previewFileId: str
-    createdByUserId: str
-
-
-class UpdateCoursesQuerySchema(BaseModel):
-    """
-    Описание структуры запроса для обновления курса
-    """
-    title: str | None
-    maxScore: int | None
-    minScore: int | None
-    minScore: int | None
-    description: str | None
-    estimatedTime: str | None
+from clients.courses.courses_schema import CreateCourseRequestSchema, CreateCourseResponseSchema, UpdateCoursesQuerySchema, GetCoursesQuerySchema
 
 
 class CoursesClient(APIClient):
