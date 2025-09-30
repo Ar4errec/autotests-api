@@ -17,7 +17,7 @@ class ExerciseSchema(BaseModel):
 
 
 
-class GetExercisesQuerySchema(BaseModel):
+class GetExerciseQuerySchema(BaseModel):
     """
     Схема запроса на получение списка упражнений
     """
@@ -50,7 +50,7 @@ class UpdateExerciseRequestSchema(BaseModel):
 
 
 
-class GetExercisesResponseSchema(BaseModel):
+class GetExerciseResponseSchema(BaseModel):
     """
     Схема ответа на получение списка упражнений
     """

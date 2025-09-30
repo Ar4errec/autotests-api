@@ -6,8 +6,8 @@ from clients.exercises.exercises_schema import (
     CreateExerciseResponseSchema,
     UpdateExerciseRequestSchema,
     UpdateExerciseResponseSchema,
-    GetExercisesQuerySchema,
-    GetExercisesResponseSchema,
+    GetExerciseQuerySchema,
+    GetExerciseResponseSchema,
     ExerciseSchema
 )
 
@@ -17,7 +17,7 @@ class ExercisesClient(APIClient):
     Клиент для работы с /api/v1/exercises
     """
 
-    def get_exercises_api(self, query: GetExercisesQuerySchema) -> Response:
+    def get_exercises_api(self, query: GetExerciseQuerySchema) -> Response:
         """
         Отправляет запрос GET /api/v1/exercises с query-параметрами
         """
@@ -49,20 +49,20 @@ class ExercisesClient(APIClient):
 
     # Методы с возвратом Pydantic-моделей
 
-    def get_exercises(self, query: GetExercisesQuerySchema) -> GetExercisesResponseSchema:
+    def get_exercises(self, query: GetExerciseQuerySchema) -> GetExerciseResponseSchema:
         """
         Получает список упражнений
         """
         response = self.get_exercises_api(query)
-        return GetExercisesResponseSchema.model_validate_json(response.text)
+        return GetExerciseResponseSchema.model_validate_json(response.text)
 
-    def get_exercise(self, exercise_id: str) -> ExerciseSchema:
+    def get_exercise(self, exercise_id: str) -> GetExerciseResponseSchema:
         """
         Получает одно упражнение по id
         """
         response = self.get_exercise_api(exercise_id)
         # Валидируем через Pydantic
-        return ExerciseSchema.model_validate(response.json())
+        return GetExerciseResponseSchema.model_validate_json(response.text())
 
     def create_exercise(self, request: CreateExerciseRequestSchema) -> CreateExerciseResponseSchema:
         """
