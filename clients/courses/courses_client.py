@@ -74,7 +74,7 @@ class CoursesClient(APIClient):
         :param query: словарь с userId
         :return: Ответ от сервера в виде объекта Response
         """
-        return self.get("/api/v1/courses", params=query)
+        return self.get("/api/v1/courses", params=query.model_dump(by_alias=True))
 
     def get_course_api(self, course_id: str) -> Response:
         """
@@ -85,12 +85,7 @@ class CoursesClient(APIClient):
         return self.get(f"/api/v1/courses/{course_id}")
 
     def create_course_api(self, request: CreateCourseRequestSchema) -> Response:
-        """
-        Метод для создания курса
-        :param request: словарь с данными курса
-        :return: Ответ от сервера в виде объекта Response
-        """
-        return self.post("/api/v1/courses", json=request)
+        return self.post("/api/v1/courses", json=request.model_dump(by_alias=True))
 
     def update_course_api(self, course_id: str, request: UpdateCoursesQuerySchema) -> Response:
         """
@@ -99,7 +94,7 @@ class CoursesClient(APIClient):
         :param request: словарь с данными курса
         :return: Ответ от сервера в виде объекта Response
         """
-        return self.patch(f"/api/v1/courses/{course_id}", json=request)
+        return self.patch(f"/api/v1/courses/{course_id}", json=request.model_dump(by_alias=True))
 
     def delete_course_api(self, course_id: str) -> Response:
         """
@@ -132,4 +127,4 @@ def get_courses_client(user: AuthenticationUserSchema) -> CoursesClient:
     Функция создаёт экземпляр CoursesClient с уже настроенным HTTP-клиентом.
     :return: Готовый к использованию PrivateUserscient.
     """
-    return CoursesClient(client=get_private_http_client())
+    return CoursesClient(client=get_private_http_client(user))

@@ -3,34 +3,7 @@ from pydantic import BaseModel, Field
 
 from clients.api_client import APIClient
 from clients.public_httpx_builder import get_public_http_client
-
-
-class UserSchema(BaseModel):
-    """
-    Описывает структуру данных пользователя.
-    """
-    id: str
-    email: str
-    lastName: str
-    firstName: str
-    middle_name: str = Field(alias="middleName")
-
-class CreateUserRequestSchema(BaseModel):
-    """
-    Описание структуры запроса для создания пользователя.
-    """
-    email: str
-    password: str
-    lastName: str
-    firstName: str
-    middleName: str
-
-
-class CreateUserResponseSchema(BaseModel):
-    """
-    Описывает структуру ответа сервера при создании пользователя.
-    """
-    user: UserSchema
+from clients.users.users_schema import CreateUserRequestSchema, CreateUserResponseSchema
 
 
 class PublicUsersClient(APIClient):

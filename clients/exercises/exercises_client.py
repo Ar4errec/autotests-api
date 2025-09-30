@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from httpx import Response
-
 from clients.api_client import APIClient
 from clients.users.private_http_builder import AuthenticationUserSchema, get_private_http_client
 
@@ -81,7 +80,7 @@ class ExercisesClient(APIClient):
         """
         Отправляет запрос GET /api/v1/exercises
         """
-        return self.get("/api/v1/exercises", params=query.model_dump())
+        return self.get("/api/v1/exercises", params=query.model_dump(by_alias=True))
 
     def get_exercise_api(self, exercise_id: str) -> Response:
         """
@@ -93,13 +92,13 @@ class ExercisesClient(APIClient):
         """
         Отправляет запрос POST /api/v1/exercises
         """
-        return self.post("/api/v1/exercises", json=request)
+        return self.post("/api/v1/exercises", json=request.model_dump(by_alias=True))
 
     def update_exercise_api(self, exercise_id: str, request: UpdateExerciseRequestSchema) -> Response:
         """
         Отправляет запрос PATCH /api/v1/exercises/{exercise_id}
         """
-        return self.patch(f"/api/v1/exercises/{exercise_id}", json=request)
+        return self.patch(f"/api/v1/exercises/{exercise_id}", json=request.model_dump(by_alias=True))
 
     def delete_exercise_api(self, exercise_id: str) -> Response:
         """

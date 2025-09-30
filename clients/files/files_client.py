@@ -1,41 +1,7 @@
 from clients.api_client import APIClient
 from httpx import Response
-from pydantic import BaseModel
 from clients.users.private_http_builder import get_private_http_client, AuthenticationUserSchema
-
-
-class FileSchema(BaseModel):
-    """
-    Представляет схему и структуру файла.
-
-    """
-    id: str
-    filename: str
-    directory: str
-    url: str
-
-
-class CreateFileRequestSchema(BaseModel):
-    """
-    Описание запроса на создание файла
-    """
-    filename: str
-    directory: str
-    upload_file: str
-
-class CreateFileResponseSchema(BaseModel):
-    """
-    Представляет схему ответа при создании файла.
-
-    Этот класс используется для моделирования ответа, возвращаемого при успешном
-    создании файла. Он инкапсулирует детали файла в форме объекта `FileSchema`.
-
-    :ivar file: Детали созданного файла.
-    :type file: FileSchema
-    """
-    file: FileSchema
-
-
+from clients.files.files_schema import CreateFileRequestSchema, CreateFileResponseSchema, FileSchema
 
 
 class FilesClient(APIClient):
@@ -50,20 +16,12 @@ class FilesClient(APIClient):
         """
         return self.get(f"/api/v1/files/{file_id}")
 
-
-
     def create_file_api(self, request: CreateFileRequestSchema) -> Response:
-        """
-        Метод создания файла
-        :param request: Запрос на создание файла
-        :return: ответ сервера в виде Response
-        """
         return self.post(
             "/api/v1/files",
-            data=request,
-            files={"upload_file": open(request["upload_file"], 'rb')}
+            data=request.model_dump(by_alias=True, exclude={"upload_file"}),
+            files={"upload_file": open(request.upload_file, "rb")}
         )
-
 
     def delete_files_api(self, file_id: str) -> Response:
          """
@@ -82,6 +40,6 @@ class FilesClient(APIClient):
 def get_files_client(user: AuthenticationUserSchema) -> FilesClient:
     """
     Функция создаёт экземпляр FilesClient с уже настроенным HTTP-клиентом.
-    :return: Готовый к использованию PrivateUserscient.
+    :return: Готовый к использованию PrivateUsersClient.
     """
-    return FilesClient(client=get_private_http_client())
+    return FilesClient(client=get_private_http_client(user))
