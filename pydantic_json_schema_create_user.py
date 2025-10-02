@@ -3,7 +3,6 @@ from clients.users.public_users_client import get_public_users_client
 from tools.assertion.schema import validate_json_schema
 from tools.fakers import get_random_email
 from clients.users.users_schema import CreateUserRequestSchema, CreateUserResponseSchema
-import jsonschema
 
 
 public_users_client = get_public_users_client()
