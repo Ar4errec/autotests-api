@@ -1,10 +1,9 @@
 from venv import create
-
 import httpx
 from tools.fakers import fake
 
 create_payload = {
-  "email": fake.email(),,
+  "email": fake.email(),
   "password": "123123",
   "lastName": "test",
   "firstName": "test",
