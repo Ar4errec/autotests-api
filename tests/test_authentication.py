@@ -1,5 +1,5 @@
 from http import HTTPStatus
-
+import pytest
 from clients.authentication.authentication_client import get_authentication_client
 from clients.authentication.authentication_schema import LoginRequestSchema, LoginResponseSchema
 from clients.users.public_users_client import get_public_users_client
@@ -10,6 +10,8 @@ from tools.assertion.schema import validate_json_schema
 from tools.fakers import fake
 
 
+@pytest.mark.authentication
+@pytest.mark.regression
 def test_login():
     """
     Проверяет процесс аутентификации:
